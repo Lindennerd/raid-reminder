@@ -8,47 +8,53 @@ module.exports = function () {
     const softresApi = 'https://softres.it/api/raid/';
 
     async function register(req, res, next) {
-        const softresId = getSoftResId(req.body.softres);
-        const raid = JSON.parse(await request.get(softresApi + '/' + softresId));
+        try {
 
-        const hasSoftRes = findSoftRes(req.body.charName, raid.reserved);
+            const softresId = getSoftResId(req.body.softres);
+            const raid = JSON.parse(await request.get(softresApi + '/' + softresId));
+
+            const hasSoftRes = findSoftRes(req.body.charName, raid.reserved);
 
 
-        if (!hasSoftRes) {
-            res.render('index', { warning: 'Soft Reserve not found for this raid.' });
-            return;
-        } else {
-            const nameRegex = new RegExp('^' + hasSoftRes.name + '$', 'i');
+            if (!hasSoftRes) {
+                res.render('index', { warning: 'Soft Reserve not found for this raid.' });
+                return;
+            } else {
+                const nameRegex = new RegExp('^' + hasSoftRes.name + '$', 'i');
 
-            softResModel.find({
-                $and: [
-                    { charName: nameRegex },
-                    { softResLink: req.body.softres }
-                ]
-            }, function (err, docs) {
-                if (docs.length) {
-                    res.render('index',
-                        { warning: 'You already have registered the subscription to this raid.' });
-                    return;
-                } else {
-                    const newSoftRes = new softResModel({
-                        charName: hasSoftRes.name,
-                        class: hasSoftRes.class,
-                        raidDate: raid.raidDate,
-                        discordInvite: raid.discordInvite,
-                        softResLink: req.body.softres
-                    });
+                softResModel.find({
+                    $and: [
+                        { charName: nameRegex },
+                        { softResLink: req.body.softres }
+                    ]
+                }, function (err, docs) {
+                    if (docs.length) {
+                        res.render('index',
+                            { warning: 'You already have registered the subscription to this raid.' });
+                        return;
+                    } else {
+                        const newSoftRes = new softResModel({
+                            charName: hasSoftRes.name,
+                            class: hasSoftRes.class,
+                            raidDate: raid.raidDate,
+                            discordInvite: raid.discordInvite,
+                            softResLink: req.body.softres
+                        });
 
-                    getReservedItems(hasSoftRes.items, function (items) {
-                        newSoftRes.softResItems.push(items);
-                        newSoftRes.save();
+                        getReservedItems(hasSoftRes.items, function (items) {
+                            newSoftRes.softResItems.push(items);
+                            newSoftRes.save();
 
-                        res.redirect('calendar');
-                    });
-                }
-            })
+                            res.redirect('calendar');
+                        });
+                    }
+                })
+            }
+
+
+        } catch error {
+            console.log(error);
         }
-
     }
 
     async function calendar(req, res, next) {
