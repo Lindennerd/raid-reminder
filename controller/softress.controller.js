@@ -52,7 +52,7 @@ module.exports = function () {
             }
 
 
-        } catch error {
+        } catch (error) {
             console.log(error);
         }
     }
