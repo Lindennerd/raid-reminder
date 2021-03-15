@@ -28,7 +28,10 @@
                             <td>{{class}}</td>
                             <td>{{raidDateFormatted}}</td>
                             <td>
+                                {{#if discordInvite}}
                                 <a href="{{discordInvite}}">Join in Discord</a>
+                                {{/if}}
+                                }
                             </td>
                             <td>
                                 {{#each softResItems}}
