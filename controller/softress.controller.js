@@ -28,7 +28,7 @@ module.exports = function () {
                         { softResLink: req.body.softres }
                     ]
                 }, function (err, docs) {
-                    if (docs.length) {
+                    if (docs && docs.length) {
                         res.render('index',
                             { warning: 'You already have registered the subscription to this raid.' });
                         return;
